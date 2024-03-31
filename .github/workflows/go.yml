@@ -1,0 +1,39 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+    push:
+        branches: ['main']
+    pull_request:
+        branches: ['main']
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        env:
+            SAM_STACK_NAME: cobbler-users-service
+            SAM_REGION: ca-central-1
+            SAM_CAPABILITIES: CAPABILITY_IAM
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Go
+              uses: actions/setup-go@v5
+              with:
+                  go-version: '1.x'
+
+            - name: Build
+              run: go build -tags lambda.norpc -o bootstrap -ldflags "-linkmode external -extldflags -static" ./...
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.SAM_REGION }}
+
+            - name: Deploy with SAM
+              run: |
+                  sam deploy --stack-name ${{ env.SAM_STACK_NAME }} --region ${{ env.SAM_REGION }} --capabilities ${{ env.SAM_CAPABILITIES }} --resolve-s3 --no-confirm-changeset --no-fail-on-empty-changeset

@@ -1,0 +1,9 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "cobbler-users-service"
+resolve_s3 = true
+s3_prefix = "cobbler-users-service"
+region = "ca-central-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

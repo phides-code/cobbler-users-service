@@ -17,17 +17,18 @@ import (
 
 type Entity struct {
 	// example database table structure:
-	Id          string `json:"id" dynamodbav:"id"`
-	Description string `json:"description" dynamodbav:"description"`
-	Location    string `json:"location" dynamodbav:"location"`
-	Quantity    int    `json:"quantity" dynamodbav:"quantity"`
-	// adjust fields as needed
+	Id              string   `json:"id" dynamodbav:"id"`
+	FullName        string   `json:"fullname" dynamodbav:"fullname"`
+	Email           string   `json:"email" dynamodbav:"email"`
+	AuthoredRecipes []string `json:"authoredRecipes" dynamodbav:"authoredRecipes"`
+	LikedRecipes    []string `json:"likedRecipes" dynamodbav:"likedRecipes"`
 }
 
 type NewOrUpdatedEntity struct {
-	Description string `json:"description" validate:"required"`
-	Location    string `json:"location" validate:"required"`
-	Quantity    int    `json:"quantity" validate:"required"`
+	FullName        string   `json:"fullname" validate:"required"`
+	Email           string   `json:"email" validate:"required"`
+	AuthoredRecipes []string `json:"authoredRecipes" validate:"required"`
+	LikedRecipes    []string `json:"likedRecipes" validate:"required"`
 	// adjust fields as needed
 }
 
@@ -107,11 +108,11 @@ func listEntities(ctx context.Context) ([]Entity, error) {
 
 func insertEntity(ctx context.Context, newEntity NewOrUpdatedEntity) (*Entity, error) {
 	entity := Entity{
-		Id:          uuid.NewString(),
-		Description: newEntity.Description,
-		Location:    newEntity.Location,
-		Quantity:    newEntity.Quantity,
-		// adjust fields as needed
+		Id:              uuid.NewString(),
+		FullName:        newEntity.FullName,
+		Email:           newEntity.Email,
+		AuthoredRecipes: newEntity.AuthoredRecipes,
+		LikedRecipes:    newEntity.LikedRecipes,
 	}
 
 	entityMap, err := attributevalue.MarshalMap(entity)
@@ -177,16 +178,18 @@ func updateEntity(ctx context.Context, id string, updatedEntity NewOrUpdatedEnti
 
 	expr, err := expression.NewBuilder().WithUpdate(
 		expression.Set(
-			expression.Name("description"),
-			expression.Value(updatedEntity.Description),
+			expression.Name("fullname"),
+			expression.Value(updatedEntity.FullName),
 		).Set(
-			expression.Name("location"),
-			expression.Value(updatedEntity.Location),
+			expression.Name("email"),
+			expression.Value(updatedEntity.Email),
 		).Set(
-			expression.Name("quantity"),
-			expression.Value(updatedEntity.Quantity),
+			expression.Name("authoredRecipes"),
+			expression.Value(updatedEntity.AuthoredRecipes),
+		).Set(
+			expression.Name("likedRecipes"),
+			expression.Value(updatedEntity.LikedRecipes),
 		),
-		// adjust fields as needed
 	).WithCondition(
 		expression.Equal(
 			expression.Name("id"),

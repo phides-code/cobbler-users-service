@@ -16,20 +16,28 @@ import (
 )
 
 type Entity struct {
-	// example database table structure:
 	Id              string   `json:"id" dynamodbav:"id"`
-	FullName        string   `json:"fullname" dynamodbav:"fullname"`
+	Nickname        string   `json:"nickname" dynamodbav:"nickname"`
+	Username        string   `json:"username" dynamodbav:"username"`
+	Picture         string   `json:"picture" dynamodbav:"picture"`
+	Updated_at      string   `json:"updated_at" dynamodbav:"updated_at"`
 	Email           string   `json:"email" dynamodbav:"email"`
+	Email_verified  bool     `json:"email_verified" dynamodbav:"email_verified"`
+	Sub             string   `json:"sub" dynamodbav:"sub"`
 	AuthoredRecipes []string `json:"authoredRecipes" dynamodbav:"authoredRecipes"`
 	LikedRecipes    []string `json:"likedRecipes" dynamodbav:"likedRecipes"`
 }
 
 type NewOrUpdatedEntity struct {
-	FullName        string   `json:"fullname" validate:"required"`
+	Nickname        string   `json:"nickname" validate:"required"`
+	Username        string   `json:"username" validate:"required"`
+	Picture         string   `json:"picture" validate:"required"`
+	Updated_at      string   `json:"updated_at" validate:"required"`
 	Email           string   `json:"email" validate:"required"`
+	Email_verified  bool     `json:"email_verified" validate:"required"`
+	Sub             string   `json:"sub" validate:"required"`
 	AuthoredRecipes []string `json:"authoredRecipes" validate:"required"`
 	LikedRecipes    []string `json:"likedRecipes" validate:"required"`
-	// adjust fields as needed
 }
 
 func getClient() (dynamodb.Client, error) {
@@ -109,8 +117,13 @@ func listEntities(ctx context.Context) ([]Entity, error) {
 func insertEntity(ctx context.Context, newEntity NewOrUpdatedEntity) (*Entity, error) {
 	entity := Entity{
 		Id:              uuid.NewString(),
-		FullName:        newEntity.FullName,
+		Nickname:        newEntity.Nickname,
+		Username:        newEntity.Username,
+		Picture:         newEntity.Picture,
+		Updated_at:      newEntity.Updated_at,
 		Email:           newEntity.Email,
+		Email_verified:  newEntity.Email_verified,
+		Sub:             newEntity.Sub,
 		AuthoredRecipes: newEntity.AuthoredRecipes,
 		LikedRecipes:    newEntity.LikedRecipes,
 	}
@@ -178,11 +191,26 @@ func updateEntity(ctx context.Context, id string, updatedEntity NewOrUpdatedEnti
 
 	expr, err := expression.NewBuilder().WithUpdate(
 		expression.Set(
-			expression.Name("fullname"),
-			expression.Value(updatedEntity.FullName),
+			expression.Name("nickname"),
+			expression.Value(updatedEntity.Nickname),
+		).Set(
+			expression.Name("username"),
+			expression.Value(updatedEntity.Username),
+		).Set(
+			expression.Name("picture"),
+			expression.Value(updatedEntity.Picture),
+		).Set(
+			expression.Name("updated_at"),
+			expression.Value(updatedEntity.Updated_at),
 		).Set(
 			expression.Name("email"),
 			expression.Value(updatedEntity.Email),
+		).Set(
+			expression.Name("email_verified"),
+			expression.Value(updatedEntity.Email_verified),
+		).Set(
+			expression.Name("sub"),
+			expression.Value(updatedEntity.Sub),
 		).Set(
 			expression.Name("authoredRecipes"),
 			expression.Value(updatedEntity.AuthoredRecipes),

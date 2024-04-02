@@ -1,2 +1,5 @@
 .env
 .aws-sam/
+format-data.sh
+input.json
+output.json
